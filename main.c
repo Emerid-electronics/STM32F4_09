@@ -39,13 +39,35 @@
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 
+/* ACC digital interface */
+#define LSM303_ACC_address ( 0x19 << 1 )
+#define LSM303_ACC_SAD_R LSM303_ACC_address | 0x01
+#define LSM303_ACC_SAD_W LSM303_ACC_address | 0x00
+
+
+/* --------- ACC configuration ------------ */
+
+/* ACC configuration register */
+#define LSM303_ACC_CTRL_REG1_A 0x20
+/* ACC configuration bit masks*/
+#define LSM303_ACC_ODR_100Hz 0x50
+#define LSM303_ACC_Z_ENABLE 0x04
+#define LSM303_ACC_Y_ENABLE 0x02
+#define LSM303_ACC_X_ENABLE 0x01
+
+/* ACC measurement registers */
+#define LSM303_ACC_OUT_Z_L 0x2C
+#define LSM303_ACC_OUT_Z_H 0x2D
+
+
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
 
 /* USER CODE BEGIN PV */
-
+uint8_t Data = 0;
+int16_t Zaxis = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -91,13 +113,16 @@ int main(void)
   MX_GPIO_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-
+  uint8_t settings = LSM303_ACC_ODR_100Hz | LSM303_ACC_Z_ENABLE;
+  HAL_I2C_Mem_Write(&hi2c1,LSM303_ACC_SAD_W,LSM303_ACC_CTRL_REG1_A,1,&settings,1,100);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  HAL_I2C_Mem_Read(&hi2c1,LSM303_ACC_SAD_R,LSM303_ACC_OUT_Z_H,1,&Data,1,100);
+	  Zaxis = Data << 8;
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
