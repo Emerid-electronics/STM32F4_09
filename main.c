@@ -20,10 +20,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <limits.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -51,14 +50,16 @@
 #define LSM303_ACC_CTRL_REG1_A 0x20
 /* ACC configuration bit masks*/
 #define LSM303_ACC_ODR_100Hz 0x50
+#define LSM303_ACC_G_FULL_SCALE_2 0x00
 #define LSM303_ACC_Z_ENABLE 0x04
 #define LSM303_ACC_Y_ENABLE 0x02
 #define LSM303_ACC_X_ENABLE 0x01
 
+#define LSM303_ACC_G_FULL_SCALE 2
+
 /* ACC measurement registers */
 #define LSM303_ACC_OUT_Z_L 0x2C
 #define LSM303_ACC_OUT_Z_H 0x2D
-
 
 /* USER CODE END PM */
 
@@ -68,6 +69,7 @@ I2C_HandleTypeDef hi2c1;
 /* USER CODE BEGIN PV */
 uint8_t Data = 0;
 int16_t Zaxis = 0;
+float Zaxis_g = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -123,6 +125,7 @@ int main(void)
   {
 	  HAL_I2C_Mem_Read(&hi2c1,LSM303_ACC_SAD_R,LSM303_ACC_OUT_Z_H,1,&Data,1,100);
 	  Zaxis = Data << 8;
+	  Zaxis_g = ((float)Zaxis * LSM303_ACC_G_FULL_SCALE / (float)INT16_MAX );
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
