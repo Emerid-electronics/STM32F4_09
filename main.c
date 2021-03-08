@@ -38,7 +38,7 @@
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 
-/* ACC digital interface */
+/* ACC digital interface (Slave Address)*/
 #define LSM303_ACC_address ( 0x19 << 1 )
 #define LSM303_ACC_SAD_R LSM303_ACC_address | 0x01
 #define LSM303_ACC_SAD_W LSM303_ACC_address | 0x00
@@ -55,11 +55,13 @@
 #define LSM303_ACC_Y_ENABLE 0x02
 #define LSM303_ACC_X_ENABLE 0x01
 
-#define LSM303_ACC_G_FULL_SCALE 2
+#define LSM303_ACC_G_FULL_SCALE 2.0
 
-/* ACC measurement registers */
+/* ACC Sub address registers */
 #define LSM303_ACC_OUT_Z_L 0x2C
 #define LSM303_ACC_OUT_Z_H 0x2D
+
+#define LSM303_ACC_OUT_MULTIREAD 0x80 //Needs to be added to read more than 1 byte at a time
 
 /* USER CODE END PM */
 
@@ -67,7 +69,7 @@
 I2C_HandleTypeDef hi2c1;
 
 /* USER CODE BEGIN PV */
-uint8_t Data = 0;
+uint8_t Data[2];
 int16_t Zaxis = 0;
 float Zaxis_g = 0;
 /* USER CODE END PV */
@@ -123,8 +125,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  HAL_I2C_Mem_Read(&hi2c1,LSM303_ACC_SAD_R,LSM303_ACC_OUT_Z_H,1,&Data,1,100);
-	  Zaxis = Data << 8;
+	  HAL_I2C_Mem_Read(&hi2c1,LSM303_ACC_SAD_R,LSM303_ACC_OUT_Z_L | LSM303_ACC_OUT_MULTIREAD,1,&Data,2,100);
+	  Zaxis = (Data[1] << 8) | Data[0];
 	  Zaxis_g = ((float)Zaxis * LSM303_ACC_G_FULL_SCALE / (float)INT16_MAX );
     /* USER CODE END WHILE */
 
